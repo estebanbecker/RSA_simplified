@@ -230,7 +230,7 @@ print("Alice déchiffre le message chiffré \n",chif,"\nce qui donne ")
 
 m_dechif=[]
 message=""
-for i in range(len(m_chif),1,-1):
+for i in range(len(m_chif)-1,0,-1):
     dechif=home_CRT(int.from_bytes(m_chif[i],'big'),x1a,x2a,da,na)
     dechif=dechif.to_bytes((dechif.bit_length() + 7) // 8, 'big')
 
