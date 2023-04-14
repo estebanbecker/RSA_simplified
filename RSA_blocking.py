@@ -9,6 +9,7 @@ Created on Fri Apr 17 13:44:40 2020
 
 import hashlib
 import binascii
+import random
 
 def home_mod_expnoent(x,y,n): #exponentiation modulaire
     """
@@ -97,10 +98,10 @@ def home_int_to_string(x): # pour transformer un int en string
 
 
 def mot10char(): #entrer le secret
-    secret=input("donner un secret de 50 caractères au maximum : ")
-    while (len(secret)>51):
-        secret=input("c'est beaucoup trop long, 50 caractères S.V.P : ")
-    return(secret)
+    secret=input("donner un secret: ")
+    while len(secret)==0:
+        secret = input("Veuillez entrer un secret")
+    return secret
 
 def home_CRT(c,q,p,d,n):
     """
@@ -131,6 +132,9 @@ def home_CRT(c,q,p,d,n):
 
     return m
 
+#Initialisation du generateur aleatoire
+random.seed()
+
 #voici les éléments de la clé d'Alice
 x1a=3503815992030544427564583819137897895645343456451321234534564646453453456456456456454545458764549189 #p
 x2a=3503815992030544427564583819137897895645343456451321234534564646453453456456456456454545642354565471 #q
@@ -145,8 +149,9 @@ nb=x1b*x2b # n
 phib=((x1b-1)*(x2b-1))//home_pgcd(x1b-1,x2b-1)
 eb=23 # exposants public
 db=home_ext_euclide(phib,eb) #exposant privé
+k=20 #Taille du bloc en octet
 
-
+m_bloc=[] #liste des blocs de message
 
 print("Vous êtes Bob, vous souhaitez envoyer un secret à Alice")
 print("voici votre clé publique que tout le monde a le droit de consulter")
@@ -167,9 +172,42 @@ print("*******************************************************************")
 print("voici la version en nombre décimal de ",secret," : ")
 num_sec=home_string_to_int(secret)
 print(num_sec)
+
+
+print("*******************************************************************")
+print("Voici le message en bytes")
+num_sec=num_sec.to_bytes((num_sec.bit_length() + 7) // 8, 'big') #on transforme le nombre en bytes
+print(num_sec)
+
+print("*******************************************************************")
+print("Voici le message en blocs de "+ str(k//2) +" octets")
+j=k//2
+for i in range(0,len(num_sec),j):
+    m_bloc.append(num_sec[i:i+j])
+print(m_bloc)
+
+print("*******************************************************************")
+print("Voici le message en blocs de 20 octets avec le bourrage")
+
+m_bourrer=[]
+
+#On boure les blocs avec la forme suivante: : 00‖02‖𝑥‖00‖𝑚𝑖‖ où x est un nombre aléatoire et mi est le message.
+
+for i in range(len(m_bloc)):
+    j=len(m_bloc[i])
+    x=random.randbytes(k-j-3)
+    m_bourrer.append(b'\x00\x02'+x+b'\x00'+m_bloc[i])
+
+print(m_bourrer)
+
 print("voici le message chiffré avec la publique d'Alice : ")
-chif=home_mod_expnoent(num_sec, ea, na)
-print(chif)
+m_chif=[]
+for i in range(len(m_bourrer)):
+
+    chif=home_mod_expnoent(int.from_bytes(m_bourrer[i],'big'),ea,na)
+    m_chif.append(chif.to_bytes((chif.bit_length() + 7) // 8, 'big'))
+
+print(m_chif)
 print("*******************************************************************")
 print("On utilise la fonction de hashage sha256 pour obtenir le hash du message",secret)
 Bhachis0=hashlib.sha256(secret.encode(encoding='UTF-8',errors='strict')).digest() #sha256 du message
@@ -188,10 +226,17 @@ x=input("appuyer sur entrer")
 print("*******************************************************************")
 print("Alice déchiffre le message chiffré \n",chif,"\nce qui donne ")
 
-#Nous allons ici modifier le code pour utiliser le reste chinois pour le déchiffrement
+#Nous allons ici modifier le code pour utiliser le reste chinois pour le déchiffrement et remettre le message en décimal
 
-dechif=home_int_to_string(home_CRT(chif,x1a,x2a,da,na))
-print(dechif)
+m_dechif=[]
+message=""
+for i in range(len(m_chif),1,-1):
+    dechif=home_CRT(int.from_bytes(m_chif[i],'big'),x1a,x2a,da,na)
+    dechif=dechif.to_bytes((dechif.bit_length() + 7) // 8, 'big')
+
+    message=message+home_int_to_string(int.from_bytes(dechif[k-j+2:k-1],"big"))
+
+print(message)
 print("*******************************************************************")
 print("Alice déchiffre la signature de Bob \n",signe,"\n ce qui donne  en décimal")
 designe=home_mod_expnoent(signe, eb, nb)
