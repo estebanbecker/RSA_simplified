@@ -40,7 +40,7 @@ def home_mod_expnoent(x,y,n): #exponentiation modulaire
 
 def home_ext_euclide(y,b): #algorithme d'euclide étendu pour la recherche de l'exposant secret
     """
-    param y: int le premier nombre entier
+    param y: int le premier nombre entier superieur à b
     param b: int le deuxième nombre entier
 
     return: int l'exposant secret'

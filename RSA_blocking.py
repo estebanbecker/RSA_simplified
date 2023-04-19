@@ -41,7 +41,7 @@ def home_mod_expnoent(x,y,n): #exponentiation modulaire
 
 def home_ext_euclide(y,b): #algorithme d'euclide étendu pour la recherche de l'exposant secret
     """
-    param y: int le premier nombre entier
+    param y: int le premier nombre entier superieur à b
     param b: int le deuxième nombre entier
 
     return: int l'exposant secret'
@@ -86,7 +86,6 @@ def home_string_to_int(x): # pour transformer un string en int
         z=int(ord(x[i]))*pow(2,(8*i))+z
     return(z)
 
-
 def home_int_to_string(x): # pour transformer un int en string
     txt=''
     res1=x
@@ -95,7 +94,6 @@ def home_int_to_string(x): # pour transformer un int en string
         res1=(res1-res)//(pow(2,8))
         txt=txt+chr(res)
     return txt
-
 
 def mot10char(): #entrer le secret
     secret=input("donner un secret: ")
@@ -198,6 +196,7 @@ for i in range(len(m_bloc)):
     x=random.randbytes(k-j-3)
     m_bourrer.append(b'\x00\x02'+x+b'\x00'+m_bloc[i])
 
+
 print(m_bourrer)
 
 print("voici le message chiffré avec la publique d'Alice : ")
@@ -228,15 +227,21 @@ print("Alice déchiffre le message chiffré \n",chif,"\nce qui donne ")
 
 #Nous allons ici modifier le code pour utiliser le reste chinois pour le déchiffrement et remettre le message en décimal
 
-m_dechif=[]
+dechif=""
 message=""
-for i in range(len(m_chif)-1,0,-1):
+for i in range(len(m_chif)-1,-1,-1):
     dechif=home_CRT(int.from_bytes(m_chif[i],'big'),x1a,x2a,da,na)
     dechif=dechif.to_bytes((dechif.bit_length() + 7) // 8, 'big')
 
-    message=message+home_int_to_string(int.from_bytes(dechif[k-j+2:k-1],"big"))
+    i=len(dechif)
+
+    while dechif[i-1]!=0:
+        i=i-1
+
+    message=message + "".join(reversed(dechif[i:].decode()))
 
 print(message)
+dechif=message
 print("*******************************************************************")
 print("Alice déchiffre la signature de Bob \n",signe,"\n ce qui donne  en décimal")
 designe=home_mod_expnoent(signe, eb, nb)
