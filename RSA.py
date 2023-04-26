@@ -102,9 +102,9 @@ def home_int_to_string(x): # pour transformer un int en string
 
 
 def mot10char(): #entrer le secret
-    secret=input("donner un secret de 50 caractères au maximum : ")
-    while (len(secret)>51):
-        secret=input("c'est beaucoup trop long, 50 caractères S.V.P : ")
+    secret=input("donner un secret de 65 caractères au maximum : ")
+    while (len(secret)>66):
+        secret=input("c'est beaucoup trop long, 65 caractères S.V.P : ")
     return(secret)
     
 

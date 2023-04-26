@@ -174,7 +174,7 @@ print(num_sec)
 
 print("*******************************************************************")
 print("Voici le message en bytes")
-num_sec=num_sec.to_bytes((num_sec.bit_length() + 7) // 8, 'big') #on transforme le nombre en bytes
+num_sec=num_sec.to_bytes((num_sec.bit_length() + 7) // 8, 'little') #on transforme le nombre en bytes
 print(num_sec)
 
 print("*******************************************************************")
@@ -203,8 +203,8 @@ print("voici le message chiffré avec la publique d'Alice : ")
 m_chif=[]
 for i in range(len(m_bourrer)):
 
-    chif=home_mod_expnoent(int.from_bytes(m_bourrer[i],'big'),ea,na)
-    m_chif.append(chif.to_bytes((chif.bit_length() + 7) // 8, 'big'))
+    chif=home_mod_expnoent(int.from_bytes(m_bourrer[i],'little'),ea,na)
+    m_chif.append(chif.to_bytes((chif.bit_length() + 7) // 8, 'little'))
 
 print(m_chif)
 print("*******************************************************************")
@@ -225,20 +225,18 @@ x=input("appuyer sur entrer")
 print("*******************************************************************")
 print("Alice déchiffre le message chiffré \n",chif,"\nce qui donne ")
 
-#Nous allons ici modifier le code pour utiliser le reste chinois pour le déchiffrement et remettre le message en décimal
-
 dechif=""
 message=""
-for i in range(len(m_chif)-1,-1,-1):
-    dechif=home_CRT(int.from_bytes(m_chif[i],'big'),x1a,x2a,da,na)
-    dechif=dechif.to_bytes((dechif.bit_length() + 7) // 8, 'big')
+for i in range(len(m_chif)):
+    dechif=home_CRT(int.from_bytes(m_chif[i],'little'),x1a,x2a,da,na)
+    dechif=dechif.to_bytes((dechif.bit_length() + 7) // 8, 'little')
 
     i=len(dechif)
 
     while dechif[i-1]!=0:
         i=i-1
 
-    message=message + "".join(reversed(dechif[i:].decode()))
+    message=message + "".join(dechif[i:].decode())
 
 print(message)
 dechif=message
